@@ -26,6 +26,52 @@ def acc(output, target):
     spe = tn/(tn + fp)
     return result, sen, spe
 
+from __future__ import print_function, absolute_import
+from sklearn.metrics import roc_auc_score, accuracy_score
+import torch
+import numpy as np
+import pandas as pd
+__all__ = ['accuracy', 'auc', 'acc', 'misClfRes']
+
+def softmax(X):
+    exps = np.exp(X)
+    return exps / np.sum(exps, axis=0)
+
+def accuracy(output, target, topk=(1,)):
+    """Computes the precision@k for the specified values of k"""
+    maxk = max(topk)
+    batch_size = target.size(0)
+
+    _, pred = output.topk(maxk, 1, True, True)
+    pred = pred.t()
+    correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+    res = []
+    for k in topk:
+        correct_k = correct[:k].view(-1).float().sum(0)
+        res.append(correct_k.mul_(100.0 / batch_size))
+    return res
+
+def auc(output, target):
+    """Computes the precision@k for the specified values of k"""
+    # batch_size = target.size(0)
+    pre_pos = output[:, 1].cpu().numpy()
+    # pre_pos = output.max(1)[0].cpu().numpy()
+    true = target.cpu().numpy() # [:, 1]
+    if true.all() == 1 or true.any() == 0:
+        return np.nan
+    res = roc_auc_score(true, pre_pos)
+    # print(pre_pos)
+    return res
+
+def misClfRes(output, target, path):
+    """print the index of misclassfied sample"""
+    pre_two = output.cpu().numpy()
+    pre_pro = np.apply_along_axis(softmax, 1, pre_two)
+    pre = (pre_two[:, 0] < pre_two[:, 1]).astype(int)
+    label = target.cpu().numpy()# [:, 1]
+    pd.DataFrame({'pro':pre_pro[:, 1], 'pre': pre, 'label':label, 'clf':pre==label}).to_csv(path, index=False)
+
 class AverageMeter(object):
     """Computes and stores the average and current value
        Imported from https://github.com/pytorch/examples/blob/master/imagenet/main.py#L247-L262
