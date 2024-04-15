@@ -117,8 +117,8 @@ class ViT(nn.Module):
             nn.Linear(dim, num_classes)
         )
 
-    def forward(self, video, k1, k2, k3, k4, k5, k6, k7, k8):
-        x = self.to_patch_embedding(video)
+    def forward(self, imgs, k1, k2, k3, k4, k5, k6, k7, k8):
+        x = self.to_patch_embedding(imgs)
         b, n, _ = x.shape
         k = torch.cat((k1.unsqueeze(1), k2.unsqueeze(1), k3.unsqueeze(1), k4.unsqueeze(1),
                        k5.unsqueeze(1), k6.unsqueeze(1), k7.unsqueeze(1), k8.unsqueeze(1)), dim=1).unsqueeze(2)
