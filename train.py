@@ -83,12 +83,10 @@ def main():
 
     warmup_epoch = 0
     iter_epoch = len(train_dataloader)
-    warmup_scheduler2 = WarmUpLR(optimizer2, iter_epoch * warmup_epoch)
 
     for epoch in range(0, 200):
-        warmup_scheduler2 = CosineAnnealingLR(optimizer2, T_max=t_max * iter_epoch, eta_min=0.00001)
-        optimizer = optimizer2
-        warmup_scheduler = warmup_scheduler2
+        warmup_scheduler = CosineAnnealingLR(optimizer2, T_max=t_max * iter_epoch, eta_min=0.00001)
+        optimizer = optimizer
         state_lr = optimizer.param_groups[0]['lr']
         print('\nEpoch: [%d | %d] LR: %f' % (epoch + 1, 400, state_lr))
 
